@@ -73,7 +73,7 @@ function managerOptions() {
                         }
                     }
 
-                    var newInv = updateItem.stock_quantity+ parseInt(ans.quantity)
+                    var newInv = updateItem.stock + parseInt(ans.quantity)
 
                     addInventory(updateItem.item_id, updateItem.product_name, ans.quantity, newInv);
                 })
@@ -82,7 +82,34 @@ function managerOptions() {
                 
             } else if (ans.choices === "Add new product") {
                 console.log("\n~~~~~~ Add a New Product ~~~~~~\n");
-                addProduct();
+                inquirer.prompt([
+                    {
+                        name: "name",
+                        type: "input",
+                        message: "What product do you want to add?"
+                    },
+                    {
+                        name: "department",
+                        type: "input",
+                        message: "What department?"
+                    },
+                    {
+                        name: "price",
+                        type: "input",
+                        message: "What is the unit price for each item you want to add?"
+                    },
+                    {
+                        name: "quant",
+                        type: "input",
+                        message: "How many items do you want to add?"
+                    },
+                ])
+                .then(function(ans) {
+              
+                    addProduct(ans.name, ans.department, ans.price, ans.quant);
+
+                });
+                
             }
         
         });
@@ -100,7 +127,7 @@ function viewProducts() {
 
 
 function lowInventory() {
-    connection.query("SELECT * FROM products WHERE stock_quantity < 10", function(err, res) {
+    connection.query("SELECT * FROM products WHERE stock < 10", function(err, res) {
         if (err) throw err;
         console.table(res);
         managerOptions();
@@ -111,7 +138,7 @@ function addInventory(itemID, prod, addQuant, newQuant) {
     connection.query("UPDATE products SET ? WHERE ?",
     [
         {
-        stock_quantity: newQuant
+        stock: newQuant
         },
         {
         item_id: itemID
@@ -120,17 +147,29 @@ function addInventory(itemID, prod, addQuant, newQuant) {
     function(err) {
         if (err) throw err;
         console.log("\nYou have successfully added " + addQuant + " item(s) to the " 
-        + prod + " inventory.\n");
+        + prod + " inventory.\n\n");
         managerOptions();
     });
 };
 
-function addProduct() {
-    //inquiry to collect the product_name, department_name
-    //price, and stock_quantity
-    //.then:
-    //Create/VALUE, collect
-    console.log("function to add new product");
-    managerOptions();
+function addProduct(name, dept, item_price, quant) {
 
+    connection.query("INSERT INTO products SET ?",    
+        {
+            product_name: name,
+            department_name: dept,
+            price: item_price,
+            stock: quant
+        },
+    function(err) {
+        if (err) throw err;
+        console.log("\nYou have successfully added a new product to inventory: " + 
+        "\nItem: " + name + "\nDepartment: " + dept + "\nUnit Price: "
+        + "\nQuant: " + quant + "\n\n");
+        managerOptions();
+    });
 };
+
+
+
+//validation check to make sure entries are correct types, and that product does not already exist.

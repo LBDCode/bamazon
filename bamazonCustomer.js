@@ -63,17 +63,17 @@ function customerSale() {
                     }
                 }
 
-                if (purchItem.stock_quantity < parseInt(ans.quantity)) {
+                if (purchItem.stock < parseInt(ans.quantity)) {
                     console.log("\nSorry!  There aren't enough items on hand to complete your purchase.  \nPlease select a different item or quantity.\n")
                     displayInventory();
                 } else {
                     var purchTotal = parseInt(ans.quantity) * purchItem.price;
-                    var new_quant = purchItem.stock_quantity - parseInt(ans.quantity);
+                    var new_quant = purchItem.stock - parseInt(ans.quantity);
                     
                     console.log("\nThank you for your purchase!\nYou bought " 
                     + ans.quantity + " " + ans.product + "(s) for a total of $" 
                     + purchTotal + ".\n");
-                    updateDB(purchItem.item_id, new_quant);
+                    updateDB(purchItem.item_id, new_quant, ans.quantity);
                 }
             }
         
@@ -81,12 +81,13 @@ function customerSale() {
     });
 };
 
-function updateDB(item, new_item_quant) {
+function updateDB(item, new_item_quant, sold_quant) {
     //update the DB and display new inventory
     connection.query("UPDATE products SET ? WHERE ?",
         [
             {
-            stock_quantity: new_item_quant
+            stock: new_item_quant,
+            sold: sold_quant 
             },
             {
             item_id: item
@@ -98,3 +99,5 @@ function updateDB(item, new_item_quant) {
         }
     );
 };
+
+//add validation to update DB and customer sale inputs
