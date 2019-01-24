@@ -67,13 +67,13 @@ function supervisorOptions() {
 };
 
 function viewProductSales() {
-    connection.query("SELECT * FROM departments", function(err, res) {
+    connection.query("SELECT departments.department_id, departments.department_name, departments.over_head_costs, CASE WHEN SUM(products.$total) is NULL THEN 0 ELSE SUM(products.$total) END AS total_sales, CASE WHEN SUM(products.$total) is NULL THEN (0 - departments.over_head_costs) ELSE (SUM(products.$total) - departments.over_head_costs) END AS profit FROM departments LEFT JOIN products ON departments.department_name = products.department_name GROUP BY departments.department_id ORDER BY department_id asc;",
+    function(err, res) {
         if (err) throw err;
         console.table(res);
         supervisorOptions();
     });   
 };
-
 
 function newDepartment(dept, overhead) {
     console.log(dept, overhead);
@@ -90,5 +90,3 @@ function newDepartment(dept, overhead) {
     });
 };
 
-//add validation to confirm dept doesn't already exist
-//finish dept sales function

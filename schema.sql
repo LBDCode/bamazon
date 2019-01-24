@@ -8,9 +8,19 @@ CREATE TABLE products (
     product_name VARCHAR(100),
     department_name VARCHAR(100),
     price DECIMAL (10,2),
-    stock_quantity INT,
+    stock INT,
     primary key (item_id)
 );
+
+
+
+CREATE TABLE departments (
+	department_id INT NOT NULL AUTO_INCREMENT,
+    department_name VARCHAR(100) NOT NULL,
+    over_head_costs DECIMAL (10, 2),
+    primary key (department_id)
+);
+
 
 
 INSERT INTO products (product_name, department_name, price, stock_quantity)
@@ -25,4 +35,30 @@ VALUES ("Squeeky Duck Toy", "pets", 7.50, 10),
 ("LG OLED HD Smart TV", "electronics", 2230.87, 7);
 
 
-SELECT * FROM products
+ALTER TABLE products 
+ADD COLUMN sold INT AFTER stock;
+
+
+ALTER TABLE departments
+ADD COLUMN profit DECIMAL (10,2) generated always AS ( 0 - over_head_costs);
+
+
+
+
+SELECT
+  departments.department_id,
+  departments.department_name,
+  departments.over_head_costs,
+  CASE WHEN SUM(products.$total) is NULL THEN 0
+  ELSE SUM(products.$total) END AS total_sales,
+  CASE WHEN SUM(products.$total) is NULL THEN (0 - departments.over_head_costs)
+  ELSE (SUM(products.$total) - departments.over_head_costs) END AS profit
+FROM
+ departments
+LEFT JOIN products ON departments.department_name = products.department_name
+GROUP BY
+ departments.department_id
+ORDER BY
+department_id asc;
+
+SELECT * FROM products WHERE stock_quantity < 10;
